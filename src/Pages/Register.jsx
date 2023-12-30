@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { useAuthRegister } from "../api/mutate/auth";
 import { RiMessage2Line } from "react-icons/ri";
-import { SendOtp } from "./../api/mutate/sendOtp";
+import { postData } from "../api/ClientFunction";
+import { FaRegEyeSlash } from "react-icons/fa";
+import { IoEyeOutline } from "react-icons/io5";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 const Wrapper = styled.section`
   display: flex;
   justify-content: center;
@@ -15,11 +18,35 @@ const Wrapper = styled.section`
 `;
 
 const Register = () => {
+  const navigate = useNavigate();
+  const [isVisible, setIsVisible] = useState(false);
   const [termsChecked, setTermsChecked] = useState(false);
   const [mobile, setMobile] = useState();
-  const { mutate } = SendOtp();
-  const { mutate: registerMutate, isLoading, isError } = useAuthRegister();
-  console.log("🚀 ~ file: Register.jsx:22 ~ Register ~ isLoading, isError :", isLoading, isError )
+  const [seconds, setSeconds] = useState(120);
+  const [showOtpButton, setShowOtpButton] = useState(true);
+
+  function startTimer() {
+    setShowOtpButton(false);
+
+    const interval = setInterval(() => {
+      setSeconds((prevSeconds) => {
+        // Ensure that seconds won't go below 0
+        const newSeconds = prevSeconds > 0 ? prevSeconds - 1 : 0;
+
+        if (newSeconds === 0) {
+          // Timer has reached zero, perform any necessary actions here
+          setShowOtpButton(true);
+          console.log("Time's up!");
+        }
+
+        return newSeconds;
+      });
+    }, 1000);
+
+    // Cleanup the interval on component unmount
+    return () => clearInterval(interval);
+  }
+
   const {
     register,
     handleSubmit,
@@ -30,15 +57,26 @@ const Register = () => {
     setTermsChecked(!termsChecked);
   };
 
-  function onSubmit(data) {
+  async function onSubmit(data) {
+    const url = "/auth/register";
     data.phone = mobile;
-    console.log(data)
-    registerMutate(data);
+    const res = await postData(url, data);
+    if (res.status === true) {
+      Swal.fire(
+        "Wow!..",
+        "Registration Successfull!.., Now Login your account with your credientials"
+      ).then(() => navigate("/auth/login"));
+    }
   }
-  function sendOtp() {
+
+  async function sendOtp() {
     const phone = mobile;
-    mutate({ phone });
+    // mutate({ phone });
+    const url = `/auth/otp/verify`;
+    const res = await postData(url, { phone });
+    res.status === true && startTimer();
   }
+
   return (
     <Wrapper className="active" id="via-email">
       <form
@@ -121,12 +159,21 @@ const Register = () => {
                   }}
                 />
               </div>
-              <button
-                className="btn green-btn px-4 text-white"
-                onClick={sendOtp}
-              >
-                Send Otp
-              </button>
+              {showOtpButton && (
+                <button
+                  className="btn green-btn px-4 text-white "
+                  onClick={() => {
+                    sendOtp();
+                  }}
+                >
+                  Send Otp
+                </button>
+              )}
+              {!showOtpButton && (
+                <button className="btn green-btn px-4 text-white ">
+                  Resend Otp In: {seconds}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -174,19 +221,26 @@ const Register = () => {
             </span>
             <input
               required
-              type="password"
+              type={`${isVisible ? "text" : "password"}`}
               className="form-control ps-0"
               id="password"
               placeholder="Password"
               name="password"
               {...register("password")}
             />
-            <span
-              className="material-symbols-outlined input-ico"
-              id="view_password_register"
-            >
-              visibility_off
-            </span>
+
+            {!isVisible && (
+              <FaRegEyeSlash
+                className="material-symbols-outlined input-ico"
+                onClick={() => setIsVisible(!isVisible)}
+              />
+            )}
+            {isVisible && (
+              <IoEyeOutline
+                className="material-symbols-outlined input-ico"
+                onClick={() => setIsVisible(!isVisible)}
+              />
+            )}
           </div>
         </div>
 
@@ -208,7 +262,28 @@ const Register = () => {
             />
           </div>
         </div>
-
+     {/* login page */}
+     <div className="col-12 mb-2 ">
+          <div className="checks-bg">
+            <div
+              className="pretty p-svg"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div className="state" >
+                <label>
+                  Already have an account?{" "}
+                  <span className="text-white" style={{ cursor: "pointer", important: "true" }} onClick={()=>navigate("/auth/login")} >
+                    Login
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
         {/* Email Policy Checkbox */}
         <div className="col-12">
           <div className="checks-bg">
@@ -246,7 +321,7 @@ const Register = () => {
             </div>
           </div>
         </div>
-
+   
         {/* Submit Button */}
         <button
           type="submit"

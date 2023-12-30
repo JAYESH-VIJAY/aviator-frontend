@@ -1,12 +1,28 @@
 import React, { memo, useMemo, useCallback, useState } from "react";
 import { useBetContext } from "./ContextAndHooks/BetContext";
-
+import Modal from "react-modal";
 const BetControls = memo(() => {
+  const customStyles = {
+    content: {
+      top: "50%",
+      left: "50%",
+      right: "auto",
+      bottom: "auto",
+      marginRight: "-50%",
+      transform: "translate(-50%, -50%)",
+      zIndex: "10000",
+    },
+  };
+  const [modalIsOpen, setIsOpen] = React.useState(false);
+  function openModal() {
+    setIsOpen(true);
+  }
+  function closeModal() {
+    setIsOpen(false);
+  }
+  const [betType1, setBetType1] = useState(0); // 0 for "Bet", 1 for "Auto"
+  const [betType2, setBetType2] = useState(0); // 0 for "Bet", 1 for "Auto"
   const { state: oldState, dispatch: oldDispatch } = useBetContext();
-
-  const [autoBet1, setAutoBet1] = useState(false);
-  const [autoBet2, setAutoBet2] = useState(false);
-
   const state = useMemo(() => oldState, [oldState]);
   // Memoize the dispatch function using useCallback
   const dispatch = useCallback(oldDispatch, [oldDispatch]);
@@ -20,6 +36,12 @@ const BetControls = memo(() => {
     isBet1,
     isBet2,
   } = state;
+  const handleBetTypeChange = (type) => {
+    setBetType1(type);
+  };
+  const handleBetTypeChange2 = (type) => {
+    setBetType2(type);
+  };
 
   const bet_amount_decremental1 = useCallback(
     (isExtra) => {
@@ -120,20 +142,21 @@ const BetControls = memo(() => {
     <div className="bet-controls">
       <div className="bet-control double-bet" id="main_bet_section">
         <div className="controls">
-          {/* <div
-              className="bet-box-action"
-              style={{ display: "none" }}
-              id="add_extra_bet_section_btn"
-            >
-              <span className="material-symbols-outlined text-success">
-                add_circle
-              </span>
-            </div> */}
           <div className="navigation">
             <input id="bet_type" type="hidden" value="0" />
             <div className="navigation-switcher">
-              <div className="slider bet-btn">Bet</div>
-              <div className="slider auto-btn">Auto</div>
+              <div
+                className={`slider bet-btn ${betType1 === 0 ? "active" : ""}`}
+                onClick={() => handleBetTypeChange(0)}
+              >
+                Bet
+              </div>
+              <div
+                className={`slider auto-btn ${betType1 === 1 ? "active" : ""}`}
+                onClick={() => handleBetTypeChange(1)}
+              >
+                Auto
+              </div>
               <span className="active-line"></span>
             </div>
           </div>
@@ -213,11 +236,7 @@ const BetControls = memo(() => {
                   id="extra_bet_now"
                   onClick={() => bet_now1(true)}
                 >
-                  <label
-                    className="font-family-title label"
-                  >
-                    BET
-                  </label>
+                  <label className="font-family-title label">BET</label>
                 </button>
               </div>
             )}
@@ -260,38 +279,157 @@ const BetControls = memo(() => {
               </button>
             </div>
           </div>
-          <div className="second-row">
-            <div className="cashout-block m-0">
-              <div className="cash-out-switcher">
-                <div className="form-check form-switch lg-switch d-flex align-items-center pe-5">
-                  <label className="form-check-label f-12 me-1" htmlFor="bet">
-                    Auto Bet
-                  </label>
-                  <input
-                    className="form-check-input m-0"
-                    type="checkbox"
-                    role="bet"
-                    id="main_auto_bet"
-                  />
+          <div className={`text-white ${betType1 == 0 ? "second-row" : ""}`}>
+            <div className=" m-0">
+              <div className="d-flex mt-1 mb-1">
+                <div
+                  className=" d-flex align-items-center"
+                  style={{
+                    padding: "2px 32px",
+                    borderRadius: "30px",
+                    backgroundColor: "#1d7aca",
+                  }}
+                  onClick={openModal}
+                >
+                  Auto Play
                 </div>
-                <div className="form-check form-switch lg-switch d-flex align-items-center">
-                  <label
-                    className="form-check-label f-12 me-1"
-                    htmlFor="cashout"
+                <Modal
+                  isOpen={modalIsOpen}
+                  onRequestClose={closeModal}
+                  style={customStyles}
+                >
+                  <div>
+                    <div>
+                      <div className="modal-content">
+                        <div className="modal-header login-header">
+                          <span className="material-symbols-outlined">
+                            lock
+                          </span>
+                          <h5 className="modal-title" id="exampleModalLabel">
+                            Auto Play Options:
+                          </h5>
+                        </div>
+                        <div className="mx-4 modal-body pt-0">
+                          <label id="registerError" className="error"></label>
+                          <p className="link-text f-14 email_text text-white">
+                            Select Below Options for auto play
+                          </p>
+                          <form className="login-form" id="forgotPasswordForm">
+                            <div className="content">
+                              <div
+                                className="content-part content-part-1 d-flex gap-4 "
+                                style={{
+                                  alignItems: "Center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <div className="rounds-wrap">
+                                  <div
+                                    className="d-flex gap-2"
+                                    style={{
+                                      alignItems: "Center",
+                                      justifyContent: "center",
+                                    }}
+                                  >
+                                    <span className="fw-bold f-16 ">
+                                      Number of rounds:
+                                    </span>
+                                    <div
+                                      className="btn-group"
+                                      role="group"
+                                      aria-label="Number of Rounds"
+                                    >
+                                      <button
+                                        type="button"
+                                        className="btn btn-outline-secondary"
+                                      >
+                                        10
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="btn btn-outline-secondary"
+                                      >
+                                        20
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="btn btn-outline-secondary"
+                                      >
+                                        50
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="btn btn-outline-secondary active"
+                                      >
+                                        100
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="d-flex align-items-center auto-cashout-line">
+                                  <span className="me-2 fw-bold">
+                                    Auto Cash Out:
+                                  </span>
+                                  <div className="spinner small ">
+                                    <div className="input d-flex ">
+                                      <input
+                                        type="text"
+                                        onInput={(e) =>
+                                          (e.target.value =
+                                            e.target.value.replace(
+                                              /[^\d^.]/g,
+                                              ""
+                                            ))
+                                        }
+                                        className="form-control font-weight-bold"
+                                      />
+                                      <span className="text mx-2">×</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <label id="otp_error" className="error"></label>
+                            </div>
+                            <button
+                              className="btn green-btn md-btn custm-btn-2 mx-auto mt-3 mb-3 w-100"
+                              id="processSubmit"
+                            >
+                              PROCEED
+                            </button>
+                            <div
+                              className="text-white cursor-pointer f-14 mb-2 d-flex justify-content-center"
+                              onClick={closeModal}
+                              style={{ cursor: "pointer" }}
+                            >
+                              Cancel
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Modal>
+                <div style={{ display: "flex", gap: "24px" }}>
+                  <div className=" text-white form-check form-switch lg-switch d-flex align-items-center">
+                    <label
+                      className="form-check-label f-12 me-1"
+                      htmlFor="cashout"
+                    >
+                      Auto Cash Out
+                    </label>
+                    <input
+                      className="form-check-input m-0"
+                      type="checkbox"
+                      role="cashout"
+                      id="main_checkout"
+                    />
+                  </div>
+                  <div
+                    className="spinner small"
+                    style={{ maxWidth: "100px", height: "24px" }}
                   >
-                    Auto Cash Out
-                  </label>
-                  <input
-                    className="form-check-input m-0"
-                    type="checkbox"
-                    role="cashout"
-                    id="main_checkout"
-                  />
-                </div>
-              </div>
-              <div className="cashout-spinner-wrapper">
-                <div className="cashout-spinner disabled">
-                  <div className="spinner small">
                     <div className="input full-width">
                       <input
                         className="f-16 font-weight-bold"
@@ -303,9 +441,9 @@ const BetControls = memo(() => {
                           main_incrementor_change1(e.target.value)
                         }
                       />
-                    </div>
-                    <div className="text text-x">
-                      <span className="material-symbols-outlined">close</span>
+                      <div className="text text-x">
+                        <span className="material-symbols-outlined">close</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -322,8 +460,18 @@ const BetControls = memo(() => {
           <div className="navigation">
             <input id="bet_type" type="hidden" value="0" />
             <div className="navigation-switcher">
-              <div className="slider bet-btn">Bet</div>
-              <div className="slider auto-btn">Auto</div>
+              <div
+                className={`slider bet-btn ${betType2 === 0 ? "active" : ""}`}
+                onClick={() => handleBetTypeChange2(0)}
+              >
+                Bet
+              </div>
+              <div
+                className={`slider auto-btn ${betType2 === 1 ? "active" : ""}`}
+                onClick={() => handleBetTypeChange2(1)}
+              >
+                Auto
+              </div>
               <span className="active-line"></span>
             </div>
           </div>

@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { FaRegEyeSlash } from "react-icons/fa";
+import { IoEyeOutline } from "react-icons/io5";
+import { postData } from "../api/ClientFunction";
 import Modal from "react-modal";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 const Wrapper = styled.section`
   display: flex;
   justify-content: center;
@@ -11,6 +17,38 @@ const Wrapper = styled.section`
   height: 100vh;
 `;
 export default function SignIn() {
+  const [seconds, setSeconds] = useState(120);
+  const navigate = useNavigate();
+  const { register, handleSubmit } = useForm();
+  const [isVisible, setIsVisible] = useState(false);
+  const [showOtpButton, setShowOtpButton] = useState(true);
+  const [otp, setOtp] = useState();
+  const [mobile, setMobile] = useState();
+  const otpRef = useRef();
+  const mobileRef = useRef();
+  const passwordRef = useRef();
+  function startTimer() {
+    setShowOtpButton(false);
+
+    const interval = setInterval(() => {
+      setSeconds((prevSeconds) => {
+        // Ensure that seconds won't go below 0
+        const newSeconds = prevSeconds > 0 ? prevSeconds - 1 : 0;
+
+        if (newSeconds === 0) {
+          // Timer has reached zero, perform any necessary actions here
+          setShowOtpButton(true);
+          console.log("Time's up!");
+        }
+
+        return newSeconds;
+      });
+    }, 1000);
+
+    // Cleanup the interval on component unmount
+    return () => clearInterval(interval);
+  }
+
   const customStyles = {
     content: {
       top: "50%",
@@ -29,29 +67,66 @@ export default function SignIn() {
   function closeModal() {
     setIsOpen(false);
   }
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Add your password recovery logic here
-  };
 
+  async function onSubmit(data) {
+    const url = "/auth/login";
+    console.log(data);
+    const res = await postData(url, data);
+    console.log("🚀 ~ file: SignIn.jsx:44 ~ onSubmit ~ res:", res);
+    if (res.status === true) {
+      toast.success("Login Successfull!");
+      res.token && localStorage.setItem("token", res.token);
+      navigate("/");
+    }
+  }
+  async function sendOtp() {
+    const phone = mobileRef?.current?.value;
+    console.log("🚀 ~ file: SignIn.jsx:84 ~ sendOtp ~ phone:", phone)
+    const url = `/auth/otp/verify/reset`;
+    const res = await postData(url, { phone });
+    if (res.status === true) {
+      setShowOtpButton(false);
+      startTimer();
+    }
+  }
+  async function handleForgotPassword() {
+    const phone = mobileRef.current.value;
+    const otp = otpRef.current.value;
+    const pwd = passwordRef.current.value;
+    const data = {
+      phone,
+      otp,
+      pwd,
+    };
+    const url = `/auth/resetPassword`;
+    const res = await postData(url, data);
+    closeModal();
+  }
   return (
     <Wrapper className="active" id="via-email">
-      <form className="register-form row w-75" style={{ color: "white" }}>
+      <form
+        className="register-form row w-75"
+        style={{ color: "white" }}
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <h2>Login</h2>
 
         {/* Email Field */}
         <div className="col-12">
           <div className="input-group flex-nowrap mb-3 promocode align-items-center">
             <span className="input-group-text" id="addon-wrapping">
-              <span className="material-symbols-outlined bold-icon">mail</span>
+              <span className="material-symbols-outlined bold-icon">
+                smartphone
+              </span>
             </span>
             <input
               required
-              type="email"
+              type="text"
               className="form-control ps-0"
-              id="reg_email"
-              placeholder="Email"
-              name="email"
+              id="mobile"
+              placeholder="Mobile"
+              name="phone"
+              {...register("phone")}
             />
           </div>
         </div>
@@ -64,18 +139,26 @@ export default function SignIn() {
             </span>
             <input
               required
-              type="password"
+              type={`${isVisible ? "text" : "password"}`}
               className="form-control ps-0"
               id="regpassword"
               placeholder="Password"
               name="password"
+              {...register("password")}
             />
-            <span
-              className="material-symbols-outlined input-ico"
-              id="view_password_register"
-            >
-              visibility_off
-            </span>
+
+            {!isVisible && (
+              <FaRegEyeSlash
+                className="material-symbols-outlined input-ico"
+                onClick={() => setIsVisible(!isVisible)}
+              />
+            )}
+            {isVisible && (
+              <IoEyeOutline
+                className="material-symbols-outlined input-ico"
+                onClick={() => setIsVisible(!isVisible)}
+              />
+            )}
           </div>
         </div>
         {/* forgot password */}
@@ -92,7 +175,11 @@ export default function SignIn() {
               <div className="state" style={{ marginLeft: "-20px" }}>
                 <label>
                   Forgot Your Password?{" "}
-                  <span className="text-white" onClick={openModal}>
+                  <span
+                    className="text-white"
+                    onClick={openModal}
+                    style={{ cursor: "pointer", important: "true" }}
+                  >
                     Click Here
                   </span>
                 </label>
@@ -106,8 +193,8 @@ export default function SignIn() {
           onRequestClose={closeModal}
           style={customStyles}
         >
-          <div >
-            <div >
+          <div>
+            <div>
               <div className="modal-content">
                 <div className="modal-header login-header">
                   <span className="material-symbols-outlined">lock</span>
@@ -118,24 +205,36 @@ export default function SignIn() {
                 <div className="mx-4 modal-body pt-0">
                   <label id="registerError" className="error"></label>
                   <p className="link-text f-14 email_text text-white">
-                    To recover your password, enter your email or phone number
-                    used during registration
+                    To recover your password, enter your phone number used
+                    during registration
                   </p>
-                  <form
-                    className="login-form"
-                    onSubmit={handleSubmit}
-                    id="forgotPasswordForm"
-                  >
+                  <form className="login-form" id="forgotPasswordForm">
                     <div className="login-controls">
-                      <label htmlFor="Username">
+                      <label htmlFor="mobile">
                         <input
                           type="text"
                           className="form-control text-indent-0"
-                          id="user_name"
-                          placeholder="Your email/phone"
-                          name="username"
+                          id="mobile"
+                          placeholder="Mobile"
+                          name="mobile"
                           required
+                          ref={mobileRef}
                         />
+                        {showOtpButton && (
+                          <button
+                            className="btn orange-btn px-4 text-white "
+                            onClick={() => {
+                              sendOtp();
+                            }}
+                          >
+                            Send Otp
+                          </button>
+                        )}
+                        {!showOtpButton && (
+                          <button className="btn orange-btn px-4 text-white ">
+                            Resend Otp In: {seconds}
+                          </button>
+                        )}
                       </label>
                     </div>
                     <div className="login-controls" id="otp_div">
@@ -146,6 +245,25 @@ export default function SignIn() {
                           id="otp"
                           placeholder="Verification Code"
                           name="otp"
+                          ref={otpRef}
+                          required
+                        />
+                      </label>
+                    </div>
+                    <div
+                      className="login-controls"
+                      id="otp_div"
+                      style={{ marginBottom: "-12px" }}
+                    >
+                      <label htmlFor="NewPassword">
+                        <input
+                          type="password"
+                          className="form-control text-indent-0"
+                          id="NewPassword"
+                          placeholder="New Password"
+                          name="otp"
+                          ref={passwordRef}
+                          required
                         />
                       </label>
                     </div>
@@ -155,13 +273,14 @@ export default function SignIn() {
                     <button
                       className="btn green-btn md-btn custm-btn-2 mx-auto mt-3 mb-3 w-100"
                       id="processSubmit"
+                      onClick={() => handleForgotPassword()}
                     >
                       PROCEED
                     </button>
                     <div
                       className="text-white cursor-pointer f-14 mb-2 d-flex justify-content-center"
                       onClick={closeModal}
-                      style={{cursor:"pointer"}}
+                      style={{ cursor: "pointer" }}
                     >
                       Cancel
                     </div>
@@ -197,6 +316,7 @@ export default function SignIn() {
           type="submit"
           className="btn orange-btn md-btn custm-btn-2 mx-auto mt-3 mb-0 registerSubmit"
           id="register_via_email"
+          style={{ cursor: "pointer", important: "true" }}
         >
           Login
         </button>

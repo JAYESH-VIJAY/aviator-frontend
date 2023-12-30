@@ -31,9 +31,10 @@ const handleRequest = async (method, url, data = null, customHeaders = {}) => {
     );
     return response.data;
   } catch (error) {
+    console.log("🚀 ~ file: ClientFunction.jsx:34 ~ handleRequest ~ error:", error)
     toast.error(
-      error.response.data.message
-        ? error.response.data.message
+      error?.response?.data?.message
+        ? error?.response?.data?.message
         : "Something went wrong!..."
     );
     return { success: false, err: error.message };
