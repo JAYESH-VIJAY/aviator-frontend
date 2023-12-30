@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { useAuthRegister } from "../api/mutate/auth";
+import { RiMessage2Line } from "react-icons/ri";
+import { SendOtp } from "./../api/mutate/sendOtp";
 const Wrapper = styled.section`
   display: flex;
   justify-content: center;
@@ -13,20 +16,34 @@ const Wrapper = styled.section`
 
 const Register = () => {
   const [termsChecked, setTermsChecked] = useState(false);
-
-  const handleCheckboxChange = () => {
-    setTermsChecked(!termsChecked);
-  };
+  const [mobile, setMobile] = useState();
+  const { mutate } = SendOtp();
+  const { mutate: registerMutate, isLoading, isError } = useAuthRegister();
+  console.log("🚀 ~ file: Register.jsx:22 ~ Register ~ isLoading, isError :", isLoading, isError )
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
+
+  const handleCheckboxChange = () => {
+    setTermsChecked(!termsChecked);
+  };
+
+  function onSubmit(data) {
+    data.phone = mobile;
+    console.log(data)
+    registerMutate(data);
+  }
+  function sendOtp() {
+    const phone = mobile;
+    mutate({ phone });
+  }
   return (
     <Wrapper className="active" id="via-email">
       <form
         className="register-form row w-75"
-        onSubmit={handleSubmit((data) => console.log(data))}
+        onSubmit={handleSubmit(onSubmit)}
         style={{ color: "white" }}
       >
         <h2>Register</h2>
@@ -74,23 +91,59 @@ const Register = () => {
             </select>
           </div>
         </div>
-
         {/* Mobile Field */}
         <div className="col-12">
-          <div className="input-group flex-nowrap mb-3 promocode align-items-center">
+          <div className="input-group flex-nowrap mb-3 promocode align-items-center ">
             <span className="input-group-text" id="addon-wrapping">
               <span className="material-symbols-outlined bold-icon">
                 smartphone
               </span>
             </span>
+            <div
+              style={{
+                position: "relative",
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+            >
+              <div>
+                <input
+                  required
+                  type="text"
+                  className="form-control ps-0"
+                  id="mobile"
+                  placeholder="Mobile"
+                  name="mobile"
+                  value={mobile || ""}
+                  onChange={(e) => {
+                    setMobile(e.target.value);
+                  }}
+                />
+              </div>
+              <button
+                className="btn green-btn px-4 text-white"
+                onClick={sendOtp}
+              >
+                Send Otp
+              </button>
+            </div>
+          </div>
+        </div>
+        {/* otp Field */}
+        <div className="col-12">
+          <div className="input-group flex-nowrap mb-3 promocode align-items-center">
+            <span className="input-group-text" id="addon-wrapping">
+              <RiMessage2Line className="material-symbols-outlined bold-icon" />
+            </span>
             <input
               required
               type="text"
               className="form-control ps-0"
-              id="mobile"
-              placeholder="Mobile"
-              name="mobile"
-              {...register("mobile")}
+              id="otp"
+              placeholder="OTP"
+              name="otp"
+              {...register("otp")}
             />
           </div>
         </div>
@@ -105,7 +158,7 @@ const Register = () => {
               required
               type="email"
               className="form-control ps-0"
-              id="reg_email"
+              id="email"
               placeholder="Email"
               name="email"
               {...register("email")}
@@ -123,7 +176,7 @@ const Register = () => {
               required
               type="password"
               className="form-control ps-0"
-              id="regpassword"
+              id="password"
               placeholder="Password"
               name="password"
               {...register("password")}
@@ -148,7 +201,7 @@ const Register = () => {
             <input
               type="text"
               className="form-control ps-0"
-              id="promo_code"
+              id="promocode"
               name="promocode"
               placeholder="Enter Promocode"
               {...register("promocode")}
@@ -179,12 +232,13 @@ const Register = () => {
                   required
                   type="checkbox"
                   name="terms"
+                  id="terms"
                   {...register("terms")}
                   checked={termsChecked}
                   onClick={handleCheckboxChange}
                   style={{ width: "16px", height: "16px" }}
                 />
-                <label >
+                <label>
                   I confirm that I am of legal age and agree with the{" "}
                   <Link href="/">site rules</Link>
                 </label>

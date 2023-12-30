@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 // Create an Axios instance with a base URL
 const baseURL = process.env.REACT_APP_API_URL;
 if (!baseURL) {
@@ -12,6 +13,7 @@ const api = axios.create({
 
 const handleRequest = async (method, url, data = null, customHeaders = {}) => {
   try {
+    console.log("hi");
     const response = await api({
       method,
       url,
@@ -23,9 +25,17 @@ const handleRequest = async (method, url, data = null, customHeaders = {}) => {
         ...customHeaders,
       },
     });
+    // // // console.log("🚀 ~ file: ClientFunction.jsx:27 ~ handleRequest ~ response:", response)
+    toast.success(
+      response.data.message ? response.data.message : "Success!..."
+    );
     return response.data;
   } catch (error) {
-    console.error(`Error in ${method} request to ${url}:`, error.message);
+    toast.error(
+      error.response.data.message
+        ? error.response.data.message
+        : "Something went wrong!..."
+    );
     return { success: false, err: error.message };
   }
 };
@@ -38,5 +48,6 @@ export const updateData = (url, data) => handleRequest("put", url, data);
 
 export const deleteData = (url, data) => handleRequest("delete", url, data);
 
-export const requestData = (method, url, data) =>
-  handleRequest(method, url, data);
+export const requestData = (method, url, data) => {
+  return handleRequest(method, url, data);
+};
