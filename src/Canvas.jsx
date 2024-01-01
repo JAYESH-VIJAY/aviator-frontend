@@ -1,11 +1,8 @@
 import { useRef, useEffect } from "react";
 import $ from "jquery";
-import { memo, useMemo, useCallback } from "react";
 import { useBetContext } from "./ContextAndHooks/BetContext";
-const CanvasAnimation = memo(({ stateRef }) => {
-  const { state: oldState, dispatch: oldDispatch } = useBetContext();
-  const state = useMemo(() => oldState, [oldState]);
-  const dispatch = useCallback(oldDispatch, [oldDispatch]);
+const CanvasAnimation = ({ stateRef }) => {
+  const { state, dispatch } = useBetContext();
 
   const { isPlane } = state;
   const canvasRef = useRef(null);
@@ -15,8 +12,6 @@ const CanvasAnimation = memo(({ stateRef }) => {
     var ctx = canvas.getContext("2d");
     var cW = stateRef.current.offsetWidth;
     var cH = stateRef.current.offsetHeight;
-    console.log("🚀 ~ file: Canvas.jsx:13 ~ useEffect ~ cH:", cH, cW);
-    // $("#myCanvas").attr("width", cW).attr("height", cH);
     canvas.width = cW;
     canvas.height = cH;
     var screenHeight;
@@ -97,15 +92,11 @@ const CanvasAnimation = memo(({ stateRef }) => {
         diffx = calcwidth * 45;
         horizontalLine = calcwidth * 10;
         verticalLine = calcheight * 10;
-        // console.log('calcheight', calcheight);
       } else {
         diffx = calcwidth * 30;
         horizontalLine = calcwidth * 5;
         verticalLine = calcheight * 5;
       }
-
-      // horizontalLine = calcwidth * 5;
-      // verticalLine = calcheight * 5;
       verticaldots = verticalLine / 100;
       verticalDotSize = verticaldots * 50;
       boardWidth = canvasWidth;
@@ -113,12 +104,12 @@ const CanvasAnimation = memo(({ stateRef }) => {
       widthDouble = boardWidth * 2.5;
       xPoint = 0 - boardWidth * 1.25;
       yPoint = boardheight - boardWidth * 1.25;
-      $(".rotateimage")
-        .css("width", widthDouble)
-        .css("height", widthDouble)
-        .css("top", yPoint)
-        .css("left", xPoint);
-      $(".rotateimage").addClass("rotatebg");
+      $(".rotateimage").css({
+        width: widthDouble,
+        height: widthDouble,
+        top: yPoint,
+        left: xPoint,
+      });
       imgTag = new Image();
       if (canvasWidth < 992) {
         imgheight = 48;
@@ -204,7 +195,6 @@ const CanvasAnimation = memo(({ stateRef }) => {
         clearInterval(intervalID);
         clearInterval(intervalID1);
         stopPlaneEvent = 1;
-        $(".rotateimage").removeClass("rotatebg");
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         var intervalTimex = 100;
         var intervalTimey = 50;
@@ -431,7 +421,6 @@ const CanvasAnimation = memo(({ stateRef }) => {
       //   );
       // }
     }
-
     function GameObject(
       spritesheet,
       x,
@@ -653,13 +642,24 @@ const CanvasAnimation = memo(({ stateRef }) => {
       }
     }
 
-    !isPlane ? setVariable() : stopPlane;
+    function crashPlane() {
+      $(".rotateimage").css("width", 0).css("height", 0);
+      stopPlane();
+    }
+
+    function startFlying() {
+      setVariable();
+      setTimeout(crashPlane, 60000); // 60 seconds flying, then crash
+    }
+
+    !isPlane && startFlying();
+
     // stopPlane();
   }, []); // Ensure this effect runs only once on component mount
 
   return (
     <canvas ref={canvasRef} id="myCanvas" height={400} width={1900}></canvas>
   );
-});
+};
 
 export default CanvasAnimation;

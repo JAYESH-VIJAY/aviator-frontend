@@ -22,14 +22,16 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route index path="/auth/register" element={<Register />} />
-        <Route path="/auth/login" element={<SignIn />} />
+        <Route index element={<Dashboard />} />
+
+        <Route path="/auth/register" element={<Register />} />
+        <Route index path="/auth/login" element={<SignIn />} />
         {!isLoggedIn ? (
           // Redirect to /auth/login if the user is not logged in
           <Route path="/" element={<Navigate to="/auth/login" replace />} />
         ) : (
           <Route element={<ProtectedRoute />}>
-            <Route index element={<MainLayout />}>
+            <Route element={<MainLayout />}>
               <Route index element={<Dashboard />} />
             </Route>
           </Route>
