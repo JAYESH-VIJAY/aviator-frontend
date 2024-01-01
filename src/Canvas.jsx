@@ -104,12 +104,11 @@ const CanvasAnimation = ({ stateRef }) => {
       widthDouble = boardWidth * 2.5;
       xPoint = 0 - boardWidth * 1.25;
       yPoint = boardheight - boardWidth * 1.25;
-      $(".rotateimage").css({
-        width: widthDouble,
-        height: widthDouble,
-        top: yPoint,
-        left: xPoint,
-      });
+      $(".rotateimage")
+        .css("width", widthDouble)
+        .css("height", widthDouble)
+        .css("top", yPoint)
+        .css("left", xPoint);
       imgTag = new Image();
       if (canvasWidth < 992) {
         imgheight = 48;
@@ -642,18 +641,7 @@ const CanvasAnimation = ({ stateRef }) => {
       }
     }
 
-    function crashPlane() {
-      $(".rotateimage").css("width", 0).css("height", 0);
-      stopPlane();
-    }
-
-    function startFlying() {
-      setVariable();
-      setTimeout(crashPlane, 60000); // 60 seconds flying, then crash
-    }
-
-    !isPlane && startFlying();
-
+    !isPlane ? setVariable() : stopPlane;
     // stopPlane();
   }, []); // Ensure this effect runs only once on component mount
 

@@ -13,6 +13,12 @@ const initialState = {
   extraBetAmount2: 10.0,
   withdrawn1: false,
   withdrawn2: false,
+  caseOut1: 1.0,
+  caseOut2: 1.0,
+  autoCashOut1: false,
+  autoCashOut2: false,
+  rounds1: 10,
+  rounds2: 10,
 };
 
 // Reducer Function ....
@@ -58,6 +64,28 @@ const betReducer = (state, action) => {
       return { ...state, isBet1: !action.payload ? true : action.payload };
     case "isBet2":
       return { ...state, isBet2: !action.payload ? true : action.payload };
+    case "setLogin":
+      return { ...state, isLogin: !action.payload ? false : action.payload };
+    case "authCashOut1":
+      return {
+        ...state,
+        autoCashOut1: !action.payload ? true : action.payload,
+      };
+    case "authCashOut2":
+      return {
+        ...state,
+        autoCashOut2: !action.payload ? true : action.payload,
+      };
+    case "rounds1":
+      return {
+        ...state,
+        rounds1: action.payload,
+      };
+    case "rounds2":
+      return {
+        ...state,
+        rounds2: action.payload,
+      };
     default:
       console.error(
         "Unknown action. Please check your action type in the dispatch function."
