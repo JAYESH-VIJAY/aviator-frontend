@@ -11,6 +11,7 @@ import Modal from "react-modal";
 import App from "./App";
 import "./other.css";
 import "./styles.css";
+import { RecoilRoot } from "recoil";
 // Set the app element for react-modal
 Modal.setAppElement('#root');
 const rootElement = document.getElementById("root");
@@ -31,7 +32,9 @@ root.render(
       <ReactQueryDevtools initialIsOpen={false} />
       <AuthProvider>
         <BetProvider>
+          <RecoilRoot>
           <App />
+          </RecoilRoot>
         </BetProvider>
       </AuthProvider>
     </QueryClientProvider>

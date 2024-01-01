@@ -27,14 +27,15 @@ supported by Chrome, Edge, Opera and Firefox */
   left: 50%;
   z-index: 99999;
 }
-.ReactModal__Overlay--after-open{
-  z-index:1000 !important;
+.ReactModal__Overlay {
   background-color:transparent !important;
-  /* background-color: #2c2d30 !important; */
+  z-index:1000 !important;
+
+
 }
+
 .ReactModal__Content {
   background-color: #2c2d30 !important;
-
 }
 .cashout-toaster1,
 .cashout-toaster2 {

@@ -257,7 +257,7 @@ const Register = () => {
               className="form-control ps-0"
               id="promocode"
               name="promocode"
-              placeholder="Enter Promocode"
+              placeholder="Enter Invite Code"
               {...register("promocode")}
             />
           </div>

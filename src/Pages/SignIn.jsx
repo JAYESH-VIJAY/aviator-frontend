@@ -22,8 +22,6 @@ export default function SignIn() {
   const { register, handleSubmit } = useForm();
   const [isVisible, setIsVisible] = useState(false);
   const [showOtpButton, setShowOtpButton] = useState(true);
-  const [otp, setOtp] = useState();
-  const [mobile, setMobile] = useState();
   const otpRef = useRef();
   const mobileRef = useRef();
   const passwordRef = useRef();
@@ -72,16 +70,19 @@ export default function SignIn() {
     const url = "/auth/login";
     console.log(data);
     const res = await postData(url, data);
-    console.log("🚀 ~ file: SignIn.jsx:44 ~ onSubmit ~ res:", res);
     if (res.status === true) {
-      toast.success("Login Successfull!");
-      res.token && localStorage.setItem("token", res.token);
+      toast.success("Login Successful!");
+      if (res.token) {
+        const tokenExpiryTime = 24 * 60 * 60 * 1000; // One day in milliseconds
+        const expirationTime = new Date().getTime() + tokenExpiryTime;
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("tokenExpiry", expirationTime.toString());
+      }
       navigate("/");
     }
   }
   async function sendOtp() {
     const phone = mobileRef?.current?.value;
-    console.log("🚀 ~ file: SignIn.jsx:84 ~ sendOtp ~ phone:", phone)
     const url = `/auth/otp/verify/reset`;
     const res = await postData(url, { phone });
     if (res.status === true) {

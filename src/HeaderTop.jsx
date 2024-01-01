@@ -3,13 +3,9 @@ import { useBetContext } from "./ContextAndHooks/BetContext";
 import { NavLink } from "react-router-dom";
 import Sidebar from "./Pages/SidebarModal";
 const HeaderTop = () => {
-  const { state, dispatch } = useBetContext();
+  const { state } = useBetContext();
   const { isLogin } = state;
-  useEffect(() => {
-    // Check the user's login status
-    const token = localStorage.getItem("token");
-    dispatch({ type: "setLogin", payload: !!token });
-  }, []);
+
   return (
     <div className="header-top">
       <div className="header-left">

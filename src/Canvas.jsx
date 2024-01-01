@@ -15,8 +15,6 @@ const CanvasAnimation = memo(({ stateRef }) => {
     var ctx = canvas.getContext("2d");
     var cW = stateRef.current.offsetWidth;
     var cH = stateRef.current.offsetHeight;
-    console.log("🚀 ~ file: Canvas.jsx:13 ~ useEffect ~ cH:", cH, cW);
-    // $("#myCanvas").attr("width", cW).attr("height", cH);
     canvas.width = cW;
     canvas.height = cH;
     var screenHeight;
@@ -118,7 +116,6 @@ const CanvasAnimation = memo(({ stateRef }) => {
         .css("height", widthDouble)
         .css("top", yPoint)
         .css("left", xPoint);
-      $(".rotateimage").addClass("rotatebg");
       imgTag = new Image();
       if (canvasWidth < 992) {
         imgheight = 48;
@@ -204,7 +201,6 @@ const CanvasAnimation = memo(({ stateRef }) => {
         clearInterval(intervalID);
         clearInterval(intervalID1);
         stopPlaneEvent = 1;
-        $(".rotateimage").removeClass("rotatebg");
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         var intervalTimex = 100;
         var intervalTimey = 50;
@@ -653,7 +649,17 @@ const CanvasAnimation = memo(({ stateRef }) => {
       }
     }
 
-    !isPlane ? setVariable() : stopPlane;
+    function crashPlane() {
+      $(".rotateimage").css("width", 0).css("height", 0);
+      stopPlane();
+    }
+
+    function startFlying() {
+      setVariable();
+      setTimeout(crashPlane, 60000); // 60 seconds flying, then crash
+    }
+
+    !isPlane && startFlying();
     // stopPlane();
   }, []); // Ensure this effect runs only once on component mount
 

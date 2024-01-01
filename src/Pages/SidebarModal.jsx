@@ -5,8 +5,9 @@ import { useBetContext } from "../ContextAndHooks/BetContext";
 export default function Sidebar() {
   const { dispatch } = useBetContext();
   function logout() {
-    dispatch("setLogin");
-    const token = localStorage.removeItem("token");
+    dispatch({ type: "setLogin" });
+    localStorage.removeItem("token");
+    localStorage.removeItem("tokenExpiry");
   }
   return (
     <div className="header-right d-flex align-items-center">
@@ -64,7 +65,6 @@ export default function Sidebar() {
                     type="checkbox"
                     role="switch"
                     id="sound"
-                    checked
                   />
                   <label className="form-check-label" htmlFor="sound" />
                 </div>
@@ -86,7 +86,6 @@ export default function Sidebar() {
                     type="checkbox"
                     role="switch"
                     id="music"
-                    checked
                   />
                   <label className="form-check-label" htmlFor="music" />
                 </div>
@@ -108,7 +107,6 @@ export default function Sidebar() {
                     type="checkbox"
                     role="switch"
                     id="animation"
-                    checked
                   />
                   <label className="form-check-label" htmlFor="animation" />
                 </div>
