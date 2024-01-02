@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
-import { useBetContext } from "./ContextAndHooks/BetContext";
+import React from "react";
 import { NavLink } from "react-router-dom";
 import Sidebar from "./Pages/SidebarModal";
+import { useAuth } from "./ContextAndHooks/AuthContext";
 const HeaderTop = () => {
-  const { state } = useBetContext();
-  const { isLogin } = state;
+  const { isLogin } = useAuth();
 
   return (
     <div className="header-top">

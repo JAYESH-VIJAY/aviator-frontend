@@ -1,9 +1,9 @@
 import { Outlet, Navigate } from "react-router-dom";
-import { useBetContext } from "../ContextAndHooks/BetContext";
 import { useEffect } from "react";
+import { useAuth } from "../ContextAndHooks/AuthContext";
 
 export default function ProtectedRoute() {
-  const { dispatch } = useBetContext();
+  const { setToken, setIsLogin } = useAuth();
   const token = localStorage.getItem("token");
   const tokenExpiry = localStorage.getItem("tokenExpiry");
   const currentDate = new Date().getTime();
@@ -13,7 +13,8 @@ export default function ProtectedRoute() {
     if (tokenExpiry && currentDate < parseInt(tokenExpiry, 10)) {
       // Token is still valid
       console.log("Token is still valid");
-      dispatch({ type: "setLogin", payload: !!token });
+      setToken(token);
+      setIsLogin(true);
     } else {
       // Token has expired or not found
       console.log("Token has expired or not found");

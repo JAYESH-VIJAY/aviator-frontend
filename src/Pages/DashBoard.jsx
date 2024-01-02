@@ -6,17 +6,15 @@ import HistoryTop from "./../HistoryTop";
 import StageBoard from "./../StageBoard";
 import BetParent from "./../BetParent";
 import { useLocation } from "react-router-dom";
+import PreLoader from "../Preloader";
 export default function Dashboard() {
   const location = useLocation();
-  const { isPlane } = useBetContext().state;
+  const { gameStarted,planeCrashed } = useBetContext().state;
+  console.log("🚀 ~ file: DashBoard.jsx:13 ~ Dashboard ~ planeCrashed:", planeCrashed)
   const dummyAllResults = [{ result: 1.5 }, { result: 2.0 }, { result: 3.5 }];
   useEffect(() => {
     const disableBackButton = () => {
       if (location.pathname === "/") {
-        console.log(
-          "🚀 ~ file: DashBoard.jsx:17 ~ disableBackButton ~ location.pathname:",
-          location.pathname
-        );
         // Disable the back button when on the specified path
         window.history.pushState(null, "", window.location.href);
         window.onpopstate = function () {
@@ -44,7 +42,8 @@ export default function Dashboard() {
           <div className="right-sidebar">
             <div className="game-play">
               <HistoryTop allresults={dummyAllResults} />
-              {!isPlane ? <StageBoard /> : <PreLoader />}
+              {(!gameStarted || !planeCrashed) && <StageBoard/>}
+              {planeCrashed && <PreLoader/>}
               <BetParent />
             </div>
           </div>

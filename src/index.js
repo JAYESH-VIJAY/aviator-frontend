@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import React from "react";
 import { ToastContainer, Flip } from "react-toastify";
@@ -7,36 +6,35 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BetProvider } from "./ContextAndHooks/BetContext";
 import { AuthProvider } from "./ContextAndHooks/AuthContext";
+import { SettingProvider } from "./ContextAndHooks/SettingContext";
 import Modal from "react-modal";
 import App from "./App";
 import "./other.css";
 import "./styles.css";
-import { RecoilRoot } from "recoil";
 // Set the app element for react-modal
-Modal.setAppElement('#root');
+Modal.setAppElement("#root");
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement);
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // staleTime: 60 * 1000,
-      staleTime: 0,
+      staleTime: 60 * 1000,
     },
   },
 });
 
 root.render(
-  <StrictMode>
+  <>
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
-      <AuthProvider>
+      <SettingProvider>
         <BetProvider>
-          <RecoilRoot>
-          <App />
-          </RecoilRoot>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </BetProvider>
-      </AuthProvider>
+      </SettingProvider>
     </QueryClientProvider>
     <ToastContainer
       position="top-right"
@@ -49,5 +47,5 @@ root.render(
       theme="colored"
       transition={Flip}
     />
-  </StrictMode>
+  </>
 );

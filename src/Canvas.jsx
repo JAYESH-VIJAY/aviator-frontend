@@ -1,10 +1,15 @@
 import { useRef, useEffect } from "react";
 import $ from "jquery";
 import { useBetContext } from "./ContextAndHooks/BetContext";
-const CanvasAnimation = ({ stateRef }) => {
+import { useSettingContext } from "./ContextAndHooks/SettingContext";
+import { memo } from "react";
+const CanvasAnimation = memo(({ stateRef }) => {
   const { state, dispatch } = useBetContext();
+  const { state: settingState } = useSettingContext();
+  const { sound } = settingState;
+  console.log("🚀 ~ file: Canvas.jsx:9 ~ CanvasAnimation ~ sound:", sound);
 
-  const { isPlane } = state;
+  const { gameStarted,planeCrashed } = state;
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -104,11 +109,12 @@ const CanvasAnimation = ({ stateRef }) => {
       widthDouble = boardWidth * 2.5;
       xPoint = 0 - boardWidth * 1.25;
       yPoint = boardheight - boardWidth * 1.25;
-      $(".rotateimage")
-        .css("width", widthDouble)
-        .css("height", widthDouble)
-        .css("top", yPoint)
-        .css("left", xPoint);
+      $(".rotateimage").css({
+        width: widthDouble,
+        height: widthDouble,
+        top: yPoint,
+        left: xPoint,
+      });
       imgTag = new Image();
       if (canvasWidth < 992) {
         imgheight = 48;
@@ -641,13 +647,26 @@ const CanvasAnimation = ({ stateRef }) => {
       }
     }
 
-    !isPlane ? setVariable() : stopPlane;
+    function crashPlane() {
+      $(".rotateimage").css("width", 0).css("height", 0);
+      stopPlane();
+      dispatch({ type: "gameStarted", payload: true });
+      dispatch({type:"planeCrashed",payload:true})
+    }
+
+    function startFlying() {
+      setVariable();
+      setTimeout(crashPlane, 1000); // 60 seconds flying, then crash
+    }
+
+    !gameStarted && startFlying();
+
     // stopPlane();
   }, []); // Ensure this effect runs only once on component mount
 
   return (
     <canvas ref={canvasRef} id="myCanvas" height={400} width={1900}></canvas>
   );
-};
+});
 
 export default CanvasAnimation;

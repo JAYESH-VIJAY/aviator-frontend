@@ -8,6 +8,8 @@ import { postData } from "../api/ClientFunction";
 import Modal from "react-modal";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../ContextAndHooks/AuthContext";
+import { useUserInfo } from "../api/query/useUserInfo";
 const Wrapper = styled.section`
   display: flex;
   justify-content: center;
@@ -17,6 +19,7 @@ const Wrapper = styled.section`
   height: 100vh;
 `;
 export default function SignIn() {
+  const { setUser } = useAuth();
   const [seconds, setSeconds] = useState(120);
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
@@ -27,7 +30,6 @@ export default function SignIn() {
   const passwordRef = useRef();
   function startTimer() {
     setShowOtpButton(false);
-
     const interval = setInterval(() => {
       setSeconds((prevSeconds) => {
         // Ensure that seconds won't go below 0
@@ -36,6 +38,7 @@ export default function SignIn() {
         if (newSeconds === 0) {
           // Timer has reached zero, perform any necessary actions here
           setShowOtpButton(true);
+          clearInterval(interval);
           console.log("Time's up!");
         }
 

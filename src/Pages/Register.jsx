@@ -36,6 +36,8 @@ const Register = () => {
         if (newSeconds === 0) {
           // Timer has reached zero, perform any necessary actions here
           setShowOtpButton(true);
+          clearInterval(interval)
+
           console.log("Time's up!");
         }
 

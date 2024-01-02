@@ -11,9 +11,13 @@ const api = axios.create({
   baseURL: baseURL, // Add the protocol (http or https) before the hostname
 });
 
-const handleRequest = async (method, url, data = null, customHeaders = {}) => {
+const handleUserRequest = async (
+  method,
+  url,
+  data = null,
+  customHeaders = {}
+) => {
   try {
-    console.log("hi");
     const response = await api({
       method,
       url,
@@ -25,13 +29,8 @@ const handleRequest = async (method, url, data = null, customHeaders = {}) => {
         ...customHeaders,
       },
     });
-    // // // console.log("🚀 ~ file: ClientFunction.jsx:27 ~ handleRequest ~ response:", response)
-    toast.success(
-      response.data.message ? response.data.message : "Success!..."
-    );
     return response.data;
   } catch (error) {
-    console.log("🚀 ~ file: ClientFunction.jsx:34 ~ handleRequest ~ error:", error)
     toast.error(
       error?.response?.data?.message
         ? error?.response?.data?.message
@@ -40,9 +39,36 @@ const handleRequest = async (method, url, data = null, customHeaders = {}) => {
     return { success: false, err: error.message };
   }
 };
+const handleRequest = async (method, url, data = null, customHeaders = {}) => {
+  try {
+    const response = await api({
+      method,
+      url,
+      data,
+      headers: {
+        // Add your custom headers here
+        // For example, you can add an authorization header like this:
+        // 'Authorization': 'Bearer your_token'
+        ...customHeaders,
+      },
+    });
+    toast.success(
+      response.data.message ? response.data.message : "Success!..."
+    );
+    return response.data;
+  } catch (error) {
+    toast.error(
+      error?.response?.data?.message
+        ? error?.response?.data?.message
+        : "Something went wrong!..."
+    );
+    return { success: false, err: error.message };
+  }
+};
+export const fetchUserData = (url, customHeaders) =>
+  handleUserRequest("get", url, null, customHeaders);
 
 export const fetchData = (url) => handleRequest("get", url);
-
 export const postData = (url, data) => handleRequest("post", url, data);
 
 export const updateData = (url, data) => handleRequest("put", url, data);

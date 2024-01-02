@@ -1,8 +1,9 @@
-import { memo, useMemo, useCallback, useState, useEffect } from "react";
+import { memo, useCallback, useState, useEffect } from "react";
 import { useBetContext } from "./ContextAndHooks/BetContext";
 import Modal from "react-modal";
 import { FaRegPlayCircle } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { useAuth } from "./ContextAndHooks/AuthContext";
 const BetControls = memo(() => {
   return (
     <div className="bet-controls">
@@ -15,6 +16,7 @@ const BetControls = memo(() => {
 export default BetControls;
 
 function BetButtons({ id }) {
+  const { user } = useAuth();
   //0 normal bet and 1 for auto bet
   const [betType, setBetType] = useState(0);
   const [modalIsOpen, setIsOpen] = useState(false);
@@ -24,14 +26,6 @@ function BetButtons({ id }) {
   const [rounds, setRounds] = useState(10);
   const [activeRound, setActiveRound] = useState(0);
   const [autoCashOutValue, setAutoCashOutValue] = useState("2");
-  useEffect(() => {
-    const AutoCashOut = (id) => {
-      if (id === 1) {
-        dispatch({ type: "autoCashOut1", payload: autoCashOut });
-      } else dispatch({ type: "autoCashOut2", payload: autoCashOut });
-    };
-  }, [autoCashOut]);
-
   const { state, dispatch } = useBetContext();
   const {
     extraBetAmount1,
@@ -39,14 +33,40 @@ function BetButtons({ id }) {
     gameStarted,
     withdrawn1,
     withdrawn2,
+    isLogin,
     isBet1,
     isBet2,
     autoCashOut1,
     autoCashOut2,
+    cashIncrease1,
+    cashIncrease2,
+    cashDecrease1,
+    cashDecrease2,
+    rounds1,
+    rounds2,
+    cashOut1,
+    cashOut2,
   } = state;
-  const autoCashOutHandler = (e) => {
+  console.log(state);
+
+  function handleAutoCashOutValue(id) {
+    if (id === 1) {
+      dispatch({ type: "cashOut1", payload: autoCashOutValue });
+    } else {
+      dispatch({ type: "cashOut2", payload: autoCashOutValue });
+    }
+  }
+
+  const autoCashOutHandler = (e, id) => {
     setAutoCashOut(!autoCashOut);
   };
+  useEffect(() => {
+    if (id === 1) {
+      dispatch({ type: "autoCashOut1", payload: autoCashOut });
+    } else {
+      dispatch({ type: "autoCashOut2", payload: autoCashOut });
+    }
+  }, [autoCashOut]);
 
   const handleDecreaseChange = (value) => {
     // You can add validation or other logic here if needed
@@ -62,10 +82,53 @@ function BetButtons({ id }) {
   function closeModal() {
     setIsOpen(false);
   }
-  function handleStart(e) {
+  function handleStart(e, id) {
     e.preventDefault();
     console.log("hi");
+    if (id === 1) {
+      dispatch({ type: "rounds1", payload: rounds });
+      dispatch({ type: "cashDecrease1", payload: cashDecrease });
+      dispatch({ type: "cashIncrease1", payload: cashIncrease });
+    } else {
+      dispatch({ type: "rounds2", payload: rounds });
+      dispatch({ type: "cashDecrease2", payload: cashDecrease });
+      dispatch({ type: "cashIncrease2", payload: cashIncrease });
+    }
+    closeModal();
   }
+
+  const bet_now = useCallback(
+    (id) => {
+      // const betAmount = isExtra ? extraBetAmount1 : mainBetAmount1;
+      // toast.error(`Betting now: ${betAmount}`);
+      // Add your logic for placing the bet with the selected amount
+    },
+    [dispatch]
+  );
+
+  function handleBet(id) {
+    if (gameStarted) {
+      toast.error("Game has already started...");
+      return;
+    } else {
+      if (id === 1) {
+        if (user?.money > extraBetAmount1) {
+          dispatch({ type: "isBet1", payload: true });
+          toast.success("Bet Placed!...");
+        } else {
+          toast.error("Insufficient Funds!...");
+        }
+      } else {
+        if (user?.money > extraBetAmount2) {
+          dispatch({ type: "isBet2", payload: true });
+          toast.success("Bet Placed!...");
+        } else {
+          toast.error("Insufficient Funds!...");
+        }
+      }
+    }
+  }
+
   const handleBetTypeChange = (type) => {
     setBetType(type);
   };
@@ -103,71 +166,28 @@ function BetButtons({ id }) {
     [dispatch]
   );
 
-  const bet_now = useCallback(
-    (id) => {
-      if (!gameStarted || withdrawn1 || id === 1) {
-        alert("Game has already started or bet has been withdrawn.");
-        return;
-      }
-
-      // const betAmount = isExtra ? extraBetAmount1 : mainBetAmount1;
-      // alert(`Betting now: ${betAmount}`);
-      // Add your logic for placing the bet with the selected amount
-    },
-    [dispatch]
-  );
-
-  const cancle_now = useCallback(
-    (id) => {
-      if (gameStarted || withdrawn1) {
-        alert("Game has already started or bet has been withdrawn.");
-        return;
-      }
-
-      // alert(`Cancelling now: ${isExtra ? "Extra Bet" : "Main Bet"}`);
-      // Add your logic for canceling the bet
-    },
-    [dispatch]
-  );
-
-  const cash_out_now = useCallback(
-    (id) => {
-      if (!gameStarted && (id === 1 ? withdrawn1 : withdrawn2)) {
-        alert(
-          `Game hasn't started or bet has already been withdrawn for Bet ${
-            isExtra ? 1 : 2
-          }.`
-        );
-        return;
-      }
-
-      // alert(`Withdrawing now from Bet ${isExtra ? 1 : 2}`);
-      // dispatch({ type: isExtra ? "withdrawn1" : "withdrawn2" });
-
-      // Add your logic for cashing out the bet
-    },
-    [dispatch]
-  );
-
-  const main_incrementor_change = useCallback(
-    (value, id) => {
+  function handleCashOut(id) {
+    if (!gameStarted) {
+      toast.error("game is not started yet!..");
+      return;
+    } else {
       if (id === 1) {
-        dispatch({ type: "autoCashOut1", payload: value });
+        if (!withdrawn1) {
+          dispatch({ type: "withdrawn1", payload: true });
+          return;
+        } else {
+          toast.error("Money already debited!...");
+        }
       } else {
-        dispatch({ type: "autoCashOut2", payload: value });
+        if (!withdrawn2) {
+          dispatch({ type: "withdrawn2", payload: true });
+          return;
+        } else {
+          toast.error("Money already debited!...");
+        }
       }
-      // Add your logic for main_incrementor_change
-    },
-    [dispatch]
-  );
-
-  const extra_incrementor_change = useCallback(
-    (value) => {
-      alert(`Extra Incrementor Change: ${value}`);
-      // Add your logic for extra_incrementor_change
-    },
-    [dispatch]
-  );
+    }
+  }
   const customStyles = {
     content: {
       top: "50%",
@@ -216,8 +236,18 @@ function BetButtons({ id }) {
 
                     // Update state only if the input is a valid number
                     if (!isNaN(parsedValue)) {
-                      dispatch({ type: "incExtra2", payload: parsedValue });
-                    } else dispatch({ type: "incExtra2", payload: 10.0 });
+                      if (id === 1) {
+                        dispatch({ type: "incExtra1", payload: parsedValue });
+                      } else {
+                        dispatch({ type: "incExtra2", payload: parsedValue });
+                      }
+                    } else {
+                      if (id === 1) {
+                        dispatch({ type: "incExtra1", payload: 10.0 });
+                      } else {
+                        dispatch({ type: "incExtra2", payload: 10.0 });
+                      }
+                    }
                   }}
                 />
               </div>
@@ -269,51 +299,101 @@ function BetButtons({ id }) {
               </button>
             </div>
           </div>
-          <div className="buttons-block" id="bet_button">
-            <button
-              className="btn btn-success bet font-family-title ng-star-inserted main_bet_btn"
-              id="extra_bet_now"
-              onClick={() => bet_now(id)}
-            >
-              <label className="font-family-title label">BET</label>
-            </button>
-          </div>
-          <div
-            className="buttons-block"
-            id="cancle_button"
-            style={{ display: "none" }}
-          >
-            <div
-              className="btn-tooltip f-14 mb-1"
-              id="waiting"
-              style={{ display: "none" }}
-            >
-              Waiting for next round
-            </div>
-            <button
-              className="btn btn-danger bet font-family-title height-70 ng-star-inserted main_bet_btn"
-              id="extra_cancel_now"
-              onClick={() => cancle_now(id)}
-            >
-              <label className="font-family-title label">CANCEL</label>
-            </button>
-          </div>
-          <div
-            className="buttons-block"
-            id="cashout_button"
-            style={{ display: "none" }}
-          >
-            <button
-              className="btn btn-warning bet font-family-title ng-star-inserted"
-              onClick={cash_out_now(id)}
-            >
-              <label className="font-family-title label">CASH OUT</label>
-              <div
-                className="font-family-title label"
-                id="cash_out_amount"
-              ></div>
-            </button>
-          </div>
+          {id === 1
+            ? !isBet1 &&
+              !gameStarted && (
+                <div className="buttons-block" id="bet_button">
+                  <button
+                    className="btn btn-success bet font-family-title ng-star-inserted main_bet_btn"
+                    id="extra_bet_now"
+                    onClick={() => handleBet(id)}
+                  >
+                    <label className="font-family-title label">BET</label>
+                  </button>
+                </div>
+              )
+            : !isBet2 &&
+              !gameStarted && (
+                <div className="buttons-block" id="bet_button">
+                  <button
+                    className="btn btn-success bet font-family-title ng-star-inserted main_bet_btn"
+                    id="extra_bet_now"
+                    onClick={() => handleBet(id)}
+                  >
+                    <label className="font-family-title label">BET</label>
+                  </button>
+                </div>
+              )}
+          {id === 1
+            ? gameStarted &&
+              !isBet1 && (
+                <div className="buttons-block" id="cancle_button">
+                  <div
+                    className="btn-tooltip f-14 mb-1"
+                    id="waiting"
+                    // style={{ display: "none" }}
+                  >
+                    Waiting for next round
+                  </div>
+                  <button
+                    className="btn btn-danger bet font-family-title height-70 ng-star-inserted main_bet_btn"
+                    id="extra_cancel_now"
+                    onClick={() => cancle_now(id)}
+                  >
+                    <label className="font-family-title label">
+                      Waiting For Next Round
+                    </label>
+                  </button>
+                </div>
+              )
+            : gameStarted &&
+              !isBet2 && (
+                <div className="buttons-block" id="cancle_button">
+                  <div className="btn-tooltip f-14 mb-1" id="waiting">
+                    Waiting for next round
+                  </div>
+                  <button
+                    className="btn btn-danger bet font-family-title height-70 ng-star-inserted main_bet_btn"
+                    id="extra_cancel_now"
+                    onClick={() => cancle_now(id)}
+                  >
+                    <label className="font-family-title label">
+                      Waiting For Next Round
+                    </label>
+                  </button>
+                </div>
+              )}
+          {id === 1
+            ? isBet1 &&
+              !gameStarted && (
+                <div className="buttons-block" id="cashout_button">
+                  <button
+                    className="btn btn-warning bet font-family-title ng-star-inserted"
+                    onClick={handleCashOut(id)}
+                  >
+                    <label className="font-family-title label">CASH OUT</label>
+                    <div
+                      className="font-family-title label"
+                      id="cash_out_amount"
+                    ></div>
+                  </button>
+                </div>
+              )
+            : isBet2 &&
+              !gameStarted && (
+                <div className="buttons-block" id="cashout_button">
+                  <button
+                    className="btn btn-warning bet font-family-title ng-star-inserted"
+                    onClick={cash_out_now(id)}
+                  >
+                    <label className="font-family-title label">CASH OUT</label>
+                    <div
+                      className="font-family-title label"
+                      id="cash_out_amount"
+                    ></div>
+                  </button>
+                </div>
+              )}
         </div>
         <div className={`text-white ${betType == 0 ? "second-row" : ""}`}>
           <div className=" m-0">
@@ -401,7 +481,9 @@ function BetButtons({ id }) {
                                       type="checkbox"
                                       role="cashout"
                                       id="main_checkout"
-                                      onChange={autoCashOutHandler}
+                                      onChange={(e) => {
+                                        autoCashOutHandler(e, id);
+                                      }}
                                       checked={autoCashOut}
                                     />
                                   </div>
@@ -438,6 +520,7 @@ function BetButtons({ id }) {
                                           }
 
                                           setAutoCashOutValue(inputValue);
+                                          handleAutoCashOutValue(id);
                                         }}
                                         className="form-control font-weight-bold"
                                       />
@@ -472,6 +555,7 @@ function BetButtons({ id }) {
                               <div className="spinner  mt-2">
                                 <button
                                   type="button"
+                                  required
                                   className="spinner-button"
                                   style={{
                                     borderRadius: "100%",
@@ -487,6 +571,7 @@ function BetButtons({ id }) {
                                 <div className="input ">
                                   <input
                                     type="text"
+                                    required
                                     value={cashDecrease}
                                     onChange={(e) =>
                                       handleDecreaseChange(e.target.value)
@@ -572,7 +657,7 @@ function BetButtons({ id }) {
                           <button
                             className="btn green-btn md-btn custm-btn-2 mx-auto mt-3 mb-3 w-100"
                             id="processSubmit"
-                            onClick={handleStart}
+                            onClick={(e) => handleStart(e, id)}
                           >
                             Start
                           </button>
@@ -603,7 +688,7 @@ function BetButtons({ id }) {
                     type="checkbox"
                     role="cashout"
                     id="main_checkout"
-                    onChange={autoCashOutHandler}
+                    onChange={(e) => autoCashOutHandler(e, id)}
                     checked={autoCashOut}
                   />
                 </div>
@@ -633,6 +718,7 @@ function BetButtons({ id }) {
                         }
 
                         setAutoCashOutValue(inputValue);
+                        handleAutoCashOutValue(id);
                       }}
                     />
                     <div className="text text-x">

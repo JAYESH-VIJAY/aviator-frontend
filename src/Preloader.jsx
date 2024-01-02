@@ -1,9 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 
 const PreLoader = () => {
-  console.log("h1")
-
-  const [show, setShow] = useState("block");
   return (
     <div className="load-txt" >
       <div className="loading-game-1">

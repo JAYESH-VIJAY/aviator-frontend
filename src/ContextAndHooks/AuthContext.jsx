@@ -4,21 +4,12 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-
-  const login = (userData) => {
-    // Perform login logic (useAuthLogin hook, API call, etc.)
-    // On success, set the user state
-    setUser({ username: userData.username, email: userData.email });
-  };
-
-  const logout = () => {
-    // Perform logout logic
-    // On logout, clear the user state
-    setUser(null);
-  };
-
+  const [token, setToken] = useState(null);
+  const [isLogin, setIsLogin] = useState(null);
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, setUser, token, setToken, isLogin, setIsLogin }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,13 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useBetContext } from "../ContextAndHooks/BetContext";
+import { useUserInfo } from "../api/query/useUserInfo";
+import { useAuth } from "../ContextAndHooks/AuthContext";
+import { useSettingContext } from "../ContextAndHooks/SettingContext";
 
 export default function Sidebar() {
-  const { dispatch } = useBetContext();
+  const { dispatch,sound } = useSettingContext();
+  const handleSound = () => {
+    dispatch({ type: "sound" });
+  };
+  const { setUser, user } = useAuth();
+  const { userData, error, isLoading } = useUserInfo();
+  const { setIsLogin } = useAuth();
+  useEffect(() => {
+    if (userData && userData?.user && userData.status === true) {
+      setUser(userData.user);
+    }
+  }, [userData]);
   function logout() {
-    dispatch({ type: "setLogin" });
+    setIsLogin(null);
     localStorage.removeItem("token");
     localStorage.removeItem("tokenExpiry");
+    setUser(null);
   }
   return (
     <div className="header-right d-flex align-items-center">
@@ -36,12 +50,13 @@ export default function Sidebar() {
           <li className="profile-head d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
               {/* Assuming user image, email, and id are available in your context */}
-              <img
+              {/* <img
                 // src={user("image")}
                 className="avtar-ico"
                 id="avatar_img"
                 alt="avatar"
-              />
+              /> */}
+              <span>{user?.name}</span>
               <div>
                 {/* <div className="profile-name mb-1">{user("email")}</div> */}
                 <div className="profile-name" id="username">
@@ -65,50 +80,10 @@ export default function Sidebar() {
                     type="checkbox"
                     role="switch"
                     id="sound"
+                    checked={sound}
+                    onChange={handleSound}
                   />
                   <label className="form-check-label" htmlFor="sound" />
-                </div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a className="f-12 justify-content-between">
-              <div className="d-flex align-items-center">
-                <span className="material-symbols-outlined ico f-22">
-                  music_note
-                </span>
-                MUSIC
-              </div>
-              <div>
-                <div className="form-check form-switch lg-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    role="switch"
-                    id="music"
-                  />
-                  <label className="form-check-label" htmlFor="music" />
-                </div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a className="f-12 justify-content-between">
-              <div className="d-flex align-items-center">
-                <span className="material-symbols-outlined ico f-20">
-                  mode_fan
-                </span>
-                ANIMATION
-              </div>
-              <div>
-                <div className="form-check form-switch lg-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    role="switch"
-                    id="animation"
-                  />
-                  <label className="form-check-label" htmlFor="animation" />
                 </div>
               </div>
             </a>

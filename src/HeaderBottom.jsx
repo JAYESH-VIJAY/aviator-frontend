@@ -1,7 +1,8 @@
 import React from "react";
+import { useAuth } from "./ContextAndHooks/AuthContext";
 
 const HeaderBottom = () => {
-
+  const { user } = useAuth();
   return (
     <div className="header-bottom">
       <div className="header-left">
@@ -15,7 +16,7 @@ const HeaderBottom = () => {
         </button>
         <div className="wallet-balance h-26">
           <span id="wallet_balance">
-            ₹250
+            ₹{user?.money}
             {/* You may render wallet balance dynamically here */}
           </span>
         </div>
