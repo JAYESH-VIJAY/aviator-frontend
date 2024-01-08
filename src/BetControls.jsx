@@ -97,15 +97,6 @@ function BetButtons({ id }) {
     closeModal();
   }
 
-  const bet_now = useCallback(
-    (id) => {
-      // const betAmount = isExtra ? extraBetAmount1 : mainBetAmount1;
-      // toast.error(`Betting now: ${betAmount}`);
-      // Add your logic for placing the bet with the selected amount
-    },
-    [dispatch]
-  );
-
   function handleBet(id) {
     if (gameStarted) {
       toast.error("Game has already started...");
@@ -338,7 +329,6 @@ function BetButtons({ id }) {
                   <button
                     className="btn btn-danger bet font-family-title height-70 ng-star-inserted main_bet_btn"
                     id="extra_cancel_now"
-                    onClick={() => cancle_now(id)}
                   >
                     <label className="font-family-title label">
                       Waiting For Next Round
@@ -384,7 +374,7 @@ function BetButtons({ id }) {
                 <div className="buttons-block" id="cashout_button">
                   <button
                     className="btn btn-warning bet font-family-title ng-star-inserted"
-                    onClick={cash_out_now(id)}
+                    // onClick={cash_out_now(id)}
                   >
                     <label className="font-family-title label">CASH OUT</label>
                     <div

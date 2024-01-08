@@ -40,6 +40,7 @@ export default function SignIn() {
           setShowOtpButton(true);
           clearInterval(interval);
           console.log("Time's up!");
+          clearInterval(interval);
         }
 
         return newSeconds;

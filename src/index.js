@@ -7,6 +7,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BetProvider } from "./ContextAndHooks/BetContext";
 import { AuthProvider } from "./ContextAndHooks/AuthContext";
 import { SettingProvider } from "./ContextAndHooks/SettingContext";
+import { SocketProvider } from "./ContextAndHooks/SocketContext";
 import Modal from "react-modal";
 import App from "./App";
 import "./other.css";
@@ -31,7 +32,9 @@ root.render(
       <SettingProvider>
         <BetProvider>
           <AuthProvider>
-            <App />
+            <SocketProvider>
+              <App />
+            </SocketProvider>
           </AuthProvider>
         </BetProvider>
       </SettingProvider>

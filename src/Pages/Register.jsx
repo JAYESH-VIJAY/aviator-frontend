@@ -36,8 +36,7 @@ const Register = () => {
         if (newSeconds === 0) {
           // Timer has reached zero, perform any necessary actions here
           setShowOtpButton(true);
-          clearInterval(interval)
-
+          clearInterval(interval);
           console.log("Time's up!");
         }
 
@@ -264,8 +263,8 @@ const Register = () => {
             />
           </div>
         </div>
-     {/* login page */}
-     <div className="col-12 mb-2 ">
+        {/* login page */}
+        <div className="col-12 mb-2 ">
           <div className="checks-bg">
             <div
               className="pretty p-svg"
@@ -275,10 +274,14 @@ const Register = () => {
                 justifyContent: "center",
               }}
             >
-              <div className="state" >
+              <div className="state">
                 <label>
                   Already have an account?{" "}
-                  <span className="text-white" style={{ cursor: "pointer", important: "true" }} onClick={()=>navigate("/auth/login")} >
+                  <span
+                    className="text-white"
+                    style={{ cursor: "pointer", important: "true" }}
+                    onClick={() => navigate("/auth/login")}
+                  >
                     Login
                   </span>
                 </label>
@@ -323,7 +326,7 @@ const Register = () => {
             </div>
           </div>
         </div>
-   
+
         {/* Submit Button */}
         <button
           type="submit"

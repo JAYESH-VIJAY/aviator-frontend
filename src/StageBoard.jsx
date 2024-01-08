@@ -24,7 +24,7 @@ const StageBoard = () => {
         if (seconds !== 5) {
           setSeconds((prevSeconds) => prevSeconds + 1);
         } else {
-          dispatch({ type: "planCrashed", payload: false });
+          dispatch({ type: "planCrashed", payload: true });
         }
       }
     }, 1); // Increase every millisecond (adjust as needed)

@@ -1,7 +1,8 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 // Create an Axios instance with a base URL
-const baseURL = process.env.REACT_APP_API_URL;
+export const baseURL = process.env.REACT_APP_API_URL;
+
 if (!baseURL) {
   console.log(
     ">BaseURL error,please check your env file or visit api/ClientFunction.jsx file to see more details...,Thanks!..."

@@ -9,7 +9,7 @@ const CanvasAnimation = memo(({ stateRef }) => {
   const { sound } = settingState;
   console.log("🚀 ~ file: Canvas.jsx:9 ~ CanvasAnimation ~ sound:", sound);
 
-  const { gameStarted,planeCrashed } = state;
+  const { gameStarted, planeCrashed } = state;
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -650,16 +650,18 @@ const CanvasAnimation = memo(({ stateRef }) => {
     function crashPlane() {
       $(".rotateimage").css("width", 0).css("height", 0);
       stopPlane();
-      dispatch({ type: "gameStarted", payload: true });
-      dispatch({type:"planeCrashed",payload:true})
+      dispatch({ type: "gameStarted", payload: false });  
+      dispatch({ type: "planeCrashed", payload: true });
     }
 
     function startFlying() {
+      dispatch({ type: "gameStarted", payload: true });
+      console.log("startFlying")
       setVariable();
-      setTimeout(crashPlane, 1000); // 60 seconds flying, then crash
+      setTimeout(crashPlane, 6000); // 60 seconds flying, then crash
     }
 
-    !gameStarted && startFlying();
+    !gameStarted && !planeCrashed && startFlying();
 
     // stopPlane();
   }, []); // Ensure this effect runs only once on component mount
