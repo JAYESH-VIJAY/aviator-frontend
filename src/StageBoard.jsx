@@ -53,7 +53,7 @@ const StageBoard = () => {
         </div>
       </div>
       <img src="images/bg-rotate-old.svg" className="rotateimage" />
-      <CanvasAnimation stateRef={stateRef} />
+      <CanvasAnimation  stateRef={stateRef} />
       {/* <PreLoader /> */}
     </div>
   );

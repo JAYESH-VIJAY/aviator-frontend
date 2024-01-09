@@ -1,23 +1,15 @@
 // ===== start code from here =====
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useBetContext } from "../ContextAndHooks/BetContext";
 import LeftSidebar from "./../LeftSidebar";
 import HistoryTop from "./../HistoryTop";
 import StageBoard from "./../StageBoard";
 import BetParent from "./../BetParent";
 import { useLocation } from "react-router-dom";
-
 import PreLoader from "../Preloader";
 export default function Dashboard() {
-
-
   const location = useLocation();
   const { gameStarted, planeCrashed } = useBetContext().state;
-  console.log(
-    "🚀 ~ file: DashBoard.jsx:13 ~ Dashboard ~ planeCrashed:",
-    planeCrashed,
-    gameStarted
-  );
   const dummyAllResults = [{ result: 1.5 }, { result: 2.0 }, { result: 3.5 }];
   useEffect(() => {
     const disableBackButton = () => {
@@ -49,8 +41,9 @@ export default function Dashboard() {
           <div className="right-sidebar">
             <div className="game-play">
               <HistoryTop allresults={dummyAllResults} />
-              {gameStarted && !planeCrashed && <StageBoard />}
-              {planeCrashed && <PreLoader />}
+              {/* {gameStarted && !planeCrashed && <StageBoard />}
+              {planeCrashed && <PreLoader />} */}
+              <StageBoard/>
               <BetParent />
             </div>
           </div>

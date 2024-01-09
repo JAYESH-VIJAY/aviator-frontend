@@ -1,14 +1,23 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import $ from "jquery";
 import { useBetContext } from "./ContextAndHooks/BetContext";
 import { useSettingContext } from "./ContextAndHooks/SettingContext";
 import { memo } from "react";
+// import { io } from "socket.io-client";
+// import { baseURL } from "./api/ClientFunction";
+import { useSocket } from "./ContextAndHooks/SocketContext";
 const CanvasAnimation = memo(({ stateRef }) => {
+  // const socket = io(baseURL);
+  const socket = useSocket();
+  const [gameStartTime, setGameStartTime] = useState();
+
+  function handleCrashedPlane(crashedPlaneTime) {
+    socket.emit("crashedPlane", { crashedPlaneTime });
+  }
+
   const { state, dispatch } = useBetContext();
   const { state: settingState } = useSettingContext();
   const { sound } = settingState;
-  console.log("🚀 ~ file: Canvas.jsx:9 ~ CanvasAnimation ~ sound:", sound);
-
   const { gameStarted, planeCrashed } = state;
   const canvasRef = useRef(null);
 
@@ -646,25 +655,41 @@ const CanvasAnimation = memo(({ stateRef }) => {
         ctx.closePath();
       }
     }
-
-    function crashPlane() {
-      $(".rotateimage").css("width", 0).css("height", 0);
-      stopPlane();
-      dispatch({ type: "gameStarted", payload: false });  
-      dispatch({ type: "planeCrashed", payload: true });
-    }
-
-    function startFlying() {
-      dispatch({ type: "gameStarted", payload: true });
-      console.log("startFlying")
-      setVariable();
-      setTimeout(crashPlane, 6000); // 60 seconds flying, then crash
-    }
-
-    !gameStarted && !planeCrashed && startFlying();
-
-    // stopPlane();
-  }, []); // Ensure this effect runs only once on component mount
+    var time;
+    socket?.on("gameStartedTime", (data) => {
+      console.log("Game started time:", data.gameStartedTime);
+      // Handle the gameStartedTime event data here
+  
+        function crashPlane() {
+          $(".rotateimage").css("width", 0).css("height", 0);
+          stopPlane();
+          dispatch({ type: "gameStarted", payload: false });
+          dispatch({ type: "planeCrashed", payload: true });
+          const time = new Date().getTime();
+          handleCrashedPlane(time);
+        }
+  
+        function startFlying() {
+          dispatch({ type: "gameStarted", payload: true });
+          console.log("startFlying");
+          setVariable();
+          setTimeout(crashPlane, 6000); // 60 seconds flying, then crash
+        }
+        // Calculate the time difference between the current time and the target time
+        const targetTime = gameStartTime; // Replace with your target timestamp
+        const currentTime = new Date().getTime();
+        const timeDifference = targetTime - currentTime;
+        // Check if the target time is in the future
+        if (timeDifference > 0) {
+          // Set a timeout to run the startFlying function at the specified time
+          setTimeout(startFlying, timeDifference);
+        } else {
+          // The target time is in the past, handle accordingly
+          console.log("Target time is in the past.");
+        }
+    });
+    
+  }, [gameStartTime, socket]); // Ensure this effect runs only once on component mount
 
   return (
     <canvas ref={canvasRef} id="myCanvas" height={400} width={1900}></canvas>
