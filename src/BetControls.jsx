@@ -1,4 +1,5 @@
 import { memo, useCallback, useState, useEffect } from "react";
+import { postData } from "./api/ClientFunction";
 import { useBetContext } from "./ContextAndHooks/BetContext";
 import Modal from "react-modal";
 import { FaRegPlayCircle } from "react-icons/fa";
@@ -17,6 +18,9 @@ export default BetControls;
 
 function BetButtons({ id }) {
   const { user } = useAuth();
+  const phone = user?.phone;
+  const [betId1, setBetId1] = useState(NaN);
+  const [betId2, setBetId2] = useState(NaN);
   //0 normal bet and 1 for auto bet
   const [betType, setBetType] = useState(0);
   const [modalIsOpen, setIsOpen] = useState(false);
@@ -97,26 +101,32 @@ function BetButtons({ id }) {
     closeModal();
   }
 
-  function handleBet(id) {
-    if (gameStarted) {
-      toast.error("Game has already started...");
-      return;
-    } else {
-      if (id === 1) {
-        if (user?.money > extraBetAmount1) {
-          dispatch({ type: "isBet1", payload: true });
+  async function handleBet(id) {
+    try {
+      if (gameStarted) {
+        toast.error("Game has already started...");
+        return; // Explicitly return to prevent further execution
+      }
+
+      const extraBetAmount = id === 1 ? extraBetAmount1 : extraBetAmount2;
+      const isBetPlaced = id === 1 ? isBet1 : isBet2;
+
+      if (user?.money > extraBetAmount && !isBetPlaced) {
+        const data = { phone, betAmount: extraBetAmount };
+        const res = await postData("/bet/place", data);
+        if (res.status) {
+          toast.success(res.message);
+          dispatch({ type: id === 1 ? "isBet1" : "isBet2", payload: true });
+          id === 1 ? setBetId1(res.betId) : setBetId2(res.betId);
+          console.log(isBet1);
           toast.success("Bet Placed!...");
-        } else {
-          toast.error("Insufficient Funds!...");
         }
       } else {
-        if (user?.money > extraBetAmount2) {
-          dispatch({ type: "isBet2", payload: true });
-          toast.success("Bet Placed!...");
-        } else {
-          toast.error("Insufficient Funds!...");
-        }
+        toast.error("Insufficient Funds!...");
       }
+    } catch (error) {
+      console.error("Error in handleBet:", error);
+      // Handle or log the error as needed
     }
   }
 
@@ -157,28 +167,28 @@ function BetButtons({ id }) {
     [dispatch]
   );
 
-  function handleCashOut(id) {
+  async function handleCashOut(id) {
     if (!gameStarted) {
       toast.error("game is not started yet!..");
-      return;
-    } else {
-      if (id === 1) {
-        if (!withdrawn1) {
-          dispatch({ type: "withdrawn1", payload: true });
-          return;
-        } else {
-          toast.error("Money already debited!...");
-        }
-      } else {
-        if (!withdrawn2) {
-          dispatch({ type: "withdrawn2", payload: true });
-          return;
-        } else {
-          toast.error("Money already debited!...");
-        }
+      return; // Explicit return to prevent further execution
+    }
+
+    const withdrawalKey = `withdrawn${id}`;
+    const betIdKey = `betId${id}`;
+
+    if (!withdrawn1) {
+      const data = { phone, multiplier: 1.3, betId: betIdKey };
+      const res = await postData("/bet/withdraw", data);
+      console.log("🚀 ~ handleCashOut ~ res:", res)
+      if (res.status) {
+        dispatch({ type: withdrawalKey, payload: true });
+        toast.success(res.message);
       }
+    } else {
+      toast.error("Money already debited!...");
     }
   }
+
   const customStyles = {
     content: {
       top: "50%",
@@ -345,7 +355,7 @@ function BetButtons({ id }) {
                   <button
                     className="btn btn-danger bet font-family-title height-70 ng-star-inserted main_bet_btn"
                     id="extra_cancel_now"
-                    onClick={() => cancle_now(id)}
+                    // onClick={() => cancle_now(id)}
                   >
                     <label className="font-family-title label">
                       Waiting For Next Round
@@ -359,7 +369,7 @@ function BetButtons({ id }) {
                 <div className="buttons-block" id="cashout_button">
                   <button
                     className="btn btn-warning bet font-family-title ng-star-inserted"
-                    onClick={handleCashOut(id)}
+                    onClick={()=>handleCashOut(id)}
                   >
                     <label className="font-family-title label">CASH OUT</label>
                     <div
@@ -374,7 +384,7 @@ function BetButtons({ id }) {
                 <div className="buttons-block" id="cashout_button">
                   <button
                     className="btn btn-warning bet font-family-title ng-star-inserted"
-                    // onClick={cash_out_now(id)}
+                    onClick={()=>handleCashOut(id)}
                   >
                     <label className="font-family-title label">CASH OUT</label>
                     <div

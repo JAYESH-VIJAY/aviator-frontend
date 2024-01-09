@@ -146,7 +146,7 @@ export default function Sidebar() {
               </div>
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link
               to="/deposit_withdrawals"
               className="f-12 justify-content-between"
@@ -158,7 +158,7 @@ export default function Sidebar() {
                 TRANSACTION HISTORY
               </div>
             </Link>
-          </li>
+          </li> */}
           <li>
             <Link
               to="/level-management"

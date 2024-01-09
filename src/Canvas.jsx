@@ -10,11 +10,17 @@ const CanvasAnimation = memo(({ stateRef }) => {
   // const socket = io(baseURL);
   const socket = useSocket();
   const [gameStartTime, setGameStartTime] = useState();
+  console.log("🚀 ~ CanvasAnimation ~ gameStartTime:", gameStartTime)
 
   function handleCrashedPlane(crashedPlaneTime) {
     socket.emit("crashedPlane", { crashedPlaneTime });
   }
-
+  useEffect(() => {
+    console.log("new Socket is:", socket);
+    socket?.on("gameStartedTime", (data) => {
+      setGameStartTime(data.gameStartedTime);
+    });
+  }, [socket]);
   const { state, dispatch } = useBetContext();
   const { state: settingState } = useSettingContext();
   const { sound } = settingState;
@@ -659,37 +665,37 @@ const CanvasAnimation = memo(({ stateRef }) => {
     socket?.on("gameStartedTime", (data) => {
       console.log("Game started time:", data.gameStartedTime);
       // Handle the gameStartedTime event data here
-  
-        function crashPlane() {
-          $(".rotateimage").css("width", 0).css("height", 0);
-          stopPlane();
-          dispatch({ type: "gameStarted", payload: false });
-          dispatch({ type: "planeCrashed", payload: true });
-          const time = new Date().getTime();
-          handleCrashedPlane(time);
-        }
-  
-        function startFlying() {
-          dispatch({ type: "gameStarted", payload: true });
-          console.log("startFlying");
-          setVariable();
-          setTimeout(crashPlane, 6000); // 60 seconds flying, then crash
-        }
-        // Calculate the time difference between the current time and the target time
-        const targetTime = gameStartTime; // Replace with your target timestamp
-        const currentTime = new Date().getTime();
-        const timeDifference = targetTime - currentTime;
-        // Check if the target time is in the future
-        if (timeDifference > 0) {
-          // Set a timeout to run the startFlying function at the specified time
-          setTimeout(startFlying, timeDifference);
-        } else {
-          // The target time is in the past, handle accordingly
-          console.log("Target time is in the past.");
-        }
+
+      function crashPlane() {
+        $(".rotateimage").css("width", 0).css("height", 0);
+        stopPlane();
+        dispatch({ type: "gameStarted", payload: false });
+        dispatch({ type: "planeCrashed", payload: true });
+        const time = new Date().getTime();
+        handleCrashedPlane(time);
+      }
+
+      function startFlying() {
+        dispatch({ type: "gameStarted", payload: true });
+        console.log("startFlying");
+        setVariable();
+        setTimeout(crashPlane, 6000); // 60 seconds flying, then crash
+      }
+      // Calculate the time difference between the current time and the target time
+      const targetTime = data.gameStartedTime; // Replace with your target timestamp
+      const currentTime = new Date().getTime();
+      const timeDifference = targetTime - currentTime;
+      console.log("🚀 ~ socket?.on ~ timeDifference:", timeDifference);
+      // Check if the target time is in the future
+      if (timeDifference > 0) {
+        // Set a timeout to run the startFlying function at the specified time
+        setTimeout(startFlying,5000)
+      } else {
+        // The target time is in the past, handle accordingly
+        console.log("Target time is in the past.");
+      }
     });
-    
-  }, [gameStartTime, socket]); // Ensure this effect runs only once on component mount
+  }, [ socket]); // Ensure this effect runs only once on component mount
 
   return (
     <canvas ref={canvasRef} id="myCanvas" height={400} width={1900}></canvas>

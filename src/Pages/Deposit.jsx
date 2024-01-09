@@ -22,7 +22,7 @@ const Deposit = () => {
   };
 
   return (
-    <div className="deposite-container">
+    <div className="deposite-container" style={{background:"#012348"}}>
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-md-6">
@@ -43,7 +43,7 @@ const Deposit = () => {
                 <div className="grid-view">
                   <div
                     className="grid-list"
-                    onClick={() => paymentGatewayDetails("6")}
+                    // onClick={() => paymentGatewayDetails("6")}
                   >
                     <button className="btn payment-btn" data-tab="netbanking">
                       <img
@@ -57,7 +57,7 @@ const Deposit = () => {
                   </div>
                   <div
                     className="grid-list"
-                    onClick={() => paymentGatewayDetails("3")}
+                    // onClick={() => paymentGatewayDetails("3")}
                   >
                     <button className="btn payment-btn" data-tab="upi">
                       <img src="images/app-logo/upiMt.svg" alt="UPI" />
